@@ -2,7 +2,7 @@
 
 cd /home/temp/ftp/files
 
-for file in $(ls *.zip); do
+for file in *.zip; do
 
    filename="${file%%.*}"
  
