@@ -12,7 +12,7 @@ $textFile = "$($name)OK.txt"
 $textPath = "$($temporaryFolder)\$($textFile)"
 
 sz a -tzip $zipPath $base -mx3 -ssw
-New-Item $textPath
+New-Item -Path $temporaryFolder -Name $textFile -ItemType "file"
 
 #ftp 
  
