@@ -1,32 +1,36 @@
 set-alias sz "$env:ProgramFiles\7-Zip\7z.exe" 
 
-$base = "E:\восстановление 1с\Fregat\Base\WorkBase 1Cv7"
+# var
 $temporaryFolder = "C:\1cTemporary" 
-$zipName = "1cbase $((Get-Date).toString("yyyy-MM-dd HH-mm")).zip"
+$base = "E:\восстановление 1с\Fregat\Base\WorkBase 1Cv7"
+$name = "1cbase $((Get-Date).toString("yyyy-MM-dd HH-mm"))"
+
+$zipName = "$($name).zip"
 $zipPath = "$($temporaryFolder)\$($zipName)"
+
+$textFile = "$($name)OK.txt"
+$textPath = "$($temporaryFolder)\$($textFile)"
+
 sz a -tzip $zipPath $base -mx3 -ssw
+New-Item $textPath
 
-# Auth
-$Username = "temp"
-$Password = "@132456!"
+#ftp 
+ 
+$ftp = "ftp://192.168.1.60/files/" 
+$user = ""
+$pass = ""
+ 
+$webclient = New-Object System.Net.WebClient 
+ 
+$webclient.Credentials = New-Object System.Net.NetworkCredential($user,$pass)  
+ 
+$uri = New-Object System.Uri($ftp+$zipName) 
+$webclient.UploadFile($uri, $zipPath ) 
+ 
+$uri2 = New-Object System.Uri($ftp+$textFile) 
+$webclient.UploadFile($uri2, $textPath ) 
 
-# Files/Paths
-$LatestTextFile = $zipPath
-$RemoteFile = "ftp://192.168.1.60/files/$($zipName)"
+# Clear
 
-# Create FTP Request Object
-$FTPRequest = [System.Net.FtpWebRequest]::Create("$RemoteFile")
-$FTPRequest = [System.Net.FtpWebRequest]$FTPRequest
-$FTPRequest.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
-$FTPRequest.Credentials = new-object System.Net.NetworkCredential($Username, $Password)
-$FTPRequest.UseBinary = $true
-$FTPRequest.UsePassive = $true
-# Read the File for Upload
-$FileContent = Get-Content -Encoding Byte -Path $LatestTextFile.FullName
-$FTPRequest.ContentLength = $FileContent.Length
-# Get Stream Request by bytes
-$Run = $FTPRequest.GetRequestStream()
-$Run.Write($FileContent, 0, $FileContent.Length)
-# Cleanup
-$Run.Close()
-$Run.Dispose()
+Remove-Item -Path $zipPath -Force
+Remove-Item -Path $textPath -Force
